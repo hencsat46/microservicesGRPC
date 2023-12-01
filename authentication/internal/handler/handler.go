@@ -3,10 +3,13 @@ package handler
 import (
 	"context"
 	"log"
+	"microservicesGRPC/authentication/internal/models"
 	"net"
 
 	auth "github.com/hencsat46/protos/gen/go/auth"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type handler struct {
@@ -15,6 +18,10 @@ type handler struct {
 }
 
 type UsecaseInterfaces interface {
+	Create(user *models.User) (int, error)
+	Read(id int) (*models.User, error)
+	Update(user *models.User) error
+	Delete(user *models.User) error
 }
 
 func New(u UsecaseInterfaces) *handler {
@@ -41,13 +48,22 @@ func (h *handler) Run(port string) error {
 	return nil
 }
 
-func (g *handler) register(gRPC *grpc.Server, u UsecaseInterfaces) {
+func (h *handler) register(gRPC *grpc.Server, u UsecaseInterfaces) {
 	auth.RegisterAuthServer(gRPC, &handler{usecase: u})
 }
 
 func (h *handler) Create(ctx context.Context, request *auth.RegisterRequest) (*auth.RegisterResponse, error) {
-	log.Println(request.GetUsername(), request.GetPassword(), request.GetFirstName(), request.GetSecondName())
-	return &auth.RegisterResponse{UserId: "1", Error: "nil"}, nil
+	user := models.User{Username: request.GetUsername(), Password: request.GetPassword(), FirstName: request.GetFirstName(), SecondName: request.GetSecondName()}
+
+	id, err := h.usecase.Create(&user)
+	if err != nil {
+		log.Println("жопа")
+		return nil, status.Error(codes.Internal, "Internal Server Error")
+	}
+	id32 := int32(id)
+	//log.Println((&auth.RegisterResponse{UserId: id32, Error: "nil"}).GetError())
+	//log.Println(request.GetUsername(), request.GetPassword(), request.GetFirstName(), request.GetSecondName())
+	return &auth.RegisterResponse{UserId: id32, Error: "nil"}, nil
 }
 
 func (h *handler) Read(ctx context.Context, request *auth.ReadRequest) (*auth.ReadResponse, error) {
