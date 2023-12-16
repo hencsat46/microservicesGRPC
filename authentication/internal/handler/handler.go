@@ -67,13 +67,37 @@ func (h *handler) Create(ctx context.Context, request *auth.RegisterRequest) (*a
 }
 
 func (h *handler) Read(ctx context.Context, request *auth.ReadRequest) (*auth.ReadResponse, error) {
-	panic("oops")
+	userId := request.UserId
+
+	user, err := h.usecase.Read(int(userId))
+
+	if err != nil {
+		log.Println(err)
+		return nil, nil
+	}
+
+	return &auth.ReadResponse{Username: user.Username, FirstName: user.FirstName, SecondName: user.SecondName}, nil
+
 }
 
 func (h *handler) Update(ctx context.Context, request *auth.UpdateRequest) (*auth.UpdateResponse, error) {
-	panic("oops")
+	user := models.User{Username: request.GetUsername(), Password: request.GetPassword(), FirstName: request.GetFirstName(), SecondName: request.GetSecondName()}
+
+	if erra := h.usecase.Update(&user); erra != nil {
+		log.Println(erra)
+		return &auth.UpdateResponse{Error: erra.Error()}, nil
+	} else {
+		return &auth.UpdateResponse{Error: "nil"}, nil
+	}
+
 }
 
 func (h *handler) Delete(ctx context.Context, request *auth.DeleteRequest) (*auth.DeleteResponse, error) {
-	panic("oops")
+	username := request.GetUsername()
+
+	if err := h.usecase.Delete(&models.User{Username: username}); err != nil {
+		return &auth.DeleteResponse{Error: err.Error()}, nil
+	} else {
+		return &auth.DeleteResponse{Error: "nil"}, nil
+	}
 }

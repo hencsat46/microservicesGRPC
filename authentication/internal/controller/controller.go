@@ -43,6 +43,7 @@ func (u *usecase) Read(id int) (*models.User, error) {
 func (u *usecase) Update(user *models.User) error {
 
 	if err := u.repo.Update(user); err != nil {
+		log.Println(err)
 		return nil
 	}
 
