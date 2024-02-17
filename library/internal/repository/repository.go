@@ -1,6 +1,11 @@
 package repository
 
-import "microservicesGRPC/library/internal/controller"
+import (
+	"microservicesGRPC/library/internal/controller"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
 
 type repository struct {
 	data []string
@@ -13,15 +18,6 @@ func New() controller.RepositoryInterfaces {
 func (r *repository) Create(username string) error {
 	r.data = append(r.data, username)
 	return nil
-}
-
-func (r *repository) getId(user string) int {
-	for key, value := range r.data {
-		if user == value {
-			return key
-		}
-	}
-	return -1
 }
 
 func (r *repository) Get(username string) bool {
@@ -40,7 +36,7 @@ func (r *repository) Delete(username string) error {
 			return nil
 		}
 	}
-	return nil
+	return status.Error(codes.NotFound, "Not Found")
 }
 
 func deleteElement(slice []string, s int) []string {

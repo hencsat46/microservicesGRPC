@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"microservicesGRPC/library/internal/handler"
 )
 
@@ -11,7 +12,7 @@ type usecase struct {
 type RepositoryInterfaces interface {
 	Create(string) error
 	Get(string) bool
-	// Delete(string) error
+	Delete(string) error
 }
 
 func NewUsecase(repo RepositoryInterfaces) handler.UsecaseInterfaces {
@@ -28,4 +29,13 @@ func (u *usecase) Create(username string) error {
 
 func (u *usecase) Get(username string) bool {
 	return u.repo.Get(username)
+}
+
+func (u *usecase) Delete(username string) error {
+	if err := u.repo.Delete(username); err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
 }

@@ -21,6 +21,7 @@ type handler struct {
 type UsecaseInterfaces interface {
 	Create(string) error
 	Get(string) bool
+	Delete(string) error
 }
 
 func NewHandler(u UsecaseInterfaces) *handler {
@@ -69,7 +70,6 @@ func (h *handler) Add(ctx context.Context, request *library.RegisterRequest) (*l
 
 	if err != nil {
 		log.Println(err)
-		log.Println("бляяяя")
 		return &library.RegisterResponse{Status: "Not found"}, err
 	}
 
@@ -92,4 +92,14 @@ func (h *handler) Get(ctx context.Context, request *library.GetRequest) (*librar
 		return &library.GetResponse{Status: "You are signed up"}, nil
 	}
 	return &library.GetResponse{Status: "Not found"}, status.Error(codes.NotFound, "Not Found")
+}
+
+func (h *handler) Delete(ctx context.Context, request *library.DeleteRequest) (*library.DeleteResponse, error) {
+	username := request.GetUsername()
+
+	if err := h.usecase.Delete(username); err != nil {
+		return &library.DeleteResponse{Status: "Not Found"}, err
+	}
+
+	return &library.DeleteResponse{Status: "Delete Ok"}, nil
 }
