@@ -10,10 +10,9 @@ func New() controller.RepositoryInterfaces {
 	return &repository{data: make([]string, 0, 20)}
 }
 
-func (r *repository) Create(username string) int {
+func (r *repository) Create(username string) error {
 	r.data = append(r.data, username)
-	id := r.getId(username)
-	return id
+	return nil
 }
 
 func (r *repository) getId(user string) int {
@@ -25,11 +24,13 @@ func (r *repository) getId(user string) int {
 	return -1
 }
 
-func (r *repository) Get(userId int) string {
-	if len(r.data)-1 < userId {
-		return "no user :("
+func (r *repository) Get(username string) bool {
+	for i := 0; i < len(r.data); i++ {
+		if username == r.data[i] {
+			return true
+		}
 	}
-	return r.data[userId]
+	return false
 }
 
 func (r *repository) Delete(username string) error {

@@ -19,7 +19,7 @@ type handler struct {
 
 type UsecaseInterfaces interface {
 	Create(user *models.User) (int, error)
-	Read(id int) (*models.User, error)
+	Read(string) (*models.User, error)
 	Update(user *models.User) error
 	Delete(user *models.User) error
 }
@@ -67,13 +67,14 @@ func (h *handler) Create(ctx context.Context, request *auth.RegisterRequest) (*a
 }
 
 func (h *handler) Read(ctx context.Context, request *auth.ReadRequest) (*auth.ReadResponse, error) {
-	userId := request.UserId
 
-	user, err := h.usecase.Read(int(userId))
+	username := request.GetUsername()
+
+	user, err := h.usecase.Read(username)
 
 	if err != nil {
 		log.Println(err)
-		return nil, nil
+		return &auth.ReadResponse{Username: "Not Found"}, err
 	}
 
 	return &auth.ReadResponse{Username: user.Username, FirstName: user.FirstName, SecondName: user.SecondName}, nil

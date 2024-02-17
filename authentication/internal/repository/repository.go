@@ -3,6 +3,9 @@ package repository
 import (
 	"log"
 	"microservicesGRPC/authentication/internal/models"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type repo struct {
@@ -29,11 +32,13 @@ func (r *repo) getId(user *models.User) int {
 	return -1
 }
 
-func (r *repo) Read(id int) (*models.User, error) {
-	if len(r.data)-1 < id {
-		return &models.User{Username: "No user"}, nil
+func (r *repo) Read(username string) (*models.User, error) {
+	for i := 0; i < len(r.data); i++ {
+		if username == r.data[i].Username {
+			return &r.data[i], nil
+		}
 	}
-	return &r.data[id], nil
+	return nil, status.Error(codes.NotFound, "not found")
 }
 
 func (r *repo) Update(user *models.User) error {

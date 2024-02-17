@@ -11,7 +11,7 @@ type usecase struct {
 
 type RepositoryIntefaces interface {
 	Create(*models.User) (int, error)
-	Read(int) (*models.User, error)
+	Read(string) (*models.User, error)
 	Update(*models.User) error
 	Delete(*models.User) error
 }
@@ -31,11 +31,11 @@ func (u *usecase) Create(user *models.User) (int, error) {
 
 }
 
-func (u *usecase) Read(id int) (*models.User, error) {
-	user, err := u.repo.Read(id)
+func (u *usecase) Read(username string) (*models.User, error) {
+	user, err := u.repo.Read(username)
 	if err != nil {
 		log.Println(err)
-		return nil, nil
+		return nil, err
 	}
 	return user, nil
 }
