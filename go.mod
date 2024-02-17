@@ -3,7 +3,7 @@ module microservicesGRPC
 go 1.21.4
 
 require (
-	github.com/hencsat46/protos v0.0.3
+	github.com/hencsat46/protos v0.0.5
 	google.golang.org/grpc v1.59.0
 )
 
