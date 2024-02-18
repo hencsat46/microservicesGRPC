@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"log"
 	"microservicesGRPC/authentication/internal/models"
 	"net"
@@ -74,8 +75,11 @@ func (h *handler) Read(ctx context.Context, request *auth.ReadRequest) (*auth.Re
 	user, err := h.usecase.Read(username)
 
 	if err != nil {
+		if errors.Is(err, status.Error(codes.NotFound, "not found")) {
+			return &auth.ReadResponse{Username: "Not Found"}, nil
+		}
 		log.Println(err)
-		return &auth.ReadResponse{Username: "Not Found"}, err
+		return nil, status.Error(codes.Internal, "Internal Server Error")
 	}
 
 	return &auth.ReadResponse{Username: user.Username, FirstName: user.FirstName, SecondName: user.SecondName}, nil

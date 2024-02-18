@@ -3,6 +3,9 @@ package controller
 import (
 	"log"
 	"microservicesGRPC/library/internal/handler"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type usecase struct {
@@ -19,12 +22,15 @@ func NewUsecase(repo RepositoryInterfaces) handler.UsecaseInterfaces {
 	return &usecase{repo: repo}
 }
 
-func (u *usecase) Create(username string) error {
+func (u *usecase) Create(username, authUsername string) error {
 
-	if err := u.repo.Create(username); err != nil {
-		return err
+	if authUsername != "Not Found" {
+		if err := u.repo.Create(username); err != nil {
+			return err
+		}
 	}
-	return nil
+
+	return status.Error(codes.NotFound, "not found")
 }
 
 func (u *usecase) Get(username string) bool {

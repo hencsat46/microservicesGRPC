@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net"
 
@@ -19,7 +20,7 @@ type handler struct {
 }
 
 type UsecaseInterfaces interface {
-	Create(string) error
+	Create(string, string) error
 	Get(string) bool
 	Delete(string) error
 }
@@ -67,22 +68,20 @@ func (h *handler) Add(ctx context.Context, request *library.RegisterRequest) (*l
 	client := auth.NewAuthClient(conn)
 
 	feature, err := client.Read(context.Background(), &auth.ReadRequest{Username: username})
-
 	if err != nil {
 		log.Println(err)
-		return &library.RegisterResponse{Status: "Not found"}, nil
+		return nil, status.Error(codes.Internal, "Internal Server Error")
 	}
 
-	log.Println(feature)
-
-	if feature.Username == username {
-		if err = h.usecase.Create(username); err != nil {
-			return nil, status.Error(codes.Internal, "Internal Server Error")
+	if err = h.usecase.Create(username, feature.Username); err != nil {
+		if errors.Is(err, status.Error(codes.NotFound, "not found")) {
+			return &library.RegisterResponse{Status: "Not Found"}, nil
 		}
+		log.Println(err)
+		return nil, status.Error(codes.Internal, "Internal Server Error")
 	}
 
-	return &library.RegisterResponse{Status: "Registration ok"}, err
-
+	return &library.RegisterResponse{Status: "Registration ok"}, nil
 }
 
 func (h *handler) Get(ctx context.Context, request *library.GetRequest) (*library.GetResponse, error) {
@@ -91,14 +90,14 @@ func (h *handler) Get(ctx context.Context, request *library.GetRequest) (*librar
 	if h.usecase.Get(username) {
 		return &library.GetResponse{Status: "You are signed up"}, nil
 	}
-	return &library.GetResponse{Status: "Not found"}, status.Error(codes.NotFound, "Not Found")
+	return &library.GetResponse{Status: "Not found"}, nil
 }
 
 func (h *handler) Delete(ctx context.Context, request *library.DeleteRequest) (*library.DeleteResponse, error) {
 	username := request.GetUsername()
 
 	if err := h.usecase.Delete(username); err != nil {
-		return &library.DeleteResponse{Status: "Not Found"}, err
+		return &library.DeleteResponse{Status: "Not Found"}, nil
 	}
 
 	return &library.DeleteResponse{Status: "Delete Ok"}, nil
