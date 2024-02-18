@@ -70,7 +70,7 @@ func (h *handler) Add(ctx context.Context, request *library.RegisterRequest) (*l
 
 	if err != nil {
 		log.Println(err)
-		return &library.RegisterResponse{Status: "Not found"}, err
+		return &library.RegisterResponse{Status: "Not found"}, nil
 	}
 
 	log.Println(feature)

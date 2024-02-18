@@ -53,6 +53,7 @@ func (h *handler) register(gRPC *grpc.Server, u UsecaseInterfaces) {
 }
 
 func (h *handler) Create(ctx context.Context, request *auth.RegisterRequest) (*auth.RegisterResponse, error) {
+	log.Println(request)
 	user := models.User{Username: request.GetUsername(), Password: request.GetPassword(), FirstName: request.GetFirstName(), SecondName: request.GetSecondName()}
 
 	id, err := h.usecase.Create(&user)
