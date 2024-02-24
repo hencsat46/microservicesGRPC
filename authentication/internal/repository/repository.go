@@ -49,16 +49,17 @@ func (r *repo) Update(user *models.User) error {
 			return nil
 		}
 	}
-	return nil
+	return status.Error(codes.NotFound, "not found")
 }
 
 func (r *repo) Delete(user *models.User) error {
 	for key, value := range r.data {
 		if value.Username == user.Username {
 			r.data = deleteElement(r.data, key)
+			return nil
 		}
 	}
-	return nil
+	return status.Error(codes.NotFound, "not found")
 }
 
 func deleteElement(slice []models.User, s int) []models.User {
